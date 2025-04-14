@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 )
 
 var ErrTruckNotFound = errors.New("truck not found")
@@ -30,12 +29,24 @@ func NewTruckManager() truckManager {
 }
 
 func (t *truckManager) AddTruck(id string, cargo int) error {
-	trucks := make(map[string]*Truck)
-	if _, exists := trucks[id]; exists {
-		log.Println("truck already exists")
-	} else {
-		trucks[id] = &Truck{ID: id, Cargo: cargo}
-		log.Println("truck has been added")
+	t.trucks[id] = &Truck{ID: id, Cargo: cargo}
+	return nil
+}
+
+func (t *truckManager) GetTruck(id string) (*Truck, error) {
+	truck, exists := t.trucks[id]
+	if !exists {
+		return nil, ErrTruckNotFound
 	}
+	return truck, nil
+}
+
+func (t *truckManager) RemoveTruck(id string) error {
+	delete(t.trucks, id)
+	return nil
+}
+
+func (t *truckManager) UpdateTruckCargo(id string, cargo int) error {
+	t.trucks[id].Cargo = cargo
 	return nil
 }
