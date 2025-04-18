@@ -56,3 +56,26 @@ func TestUpdateTruckCargo(t *testing.T) {
 		t.Errorf("Expected truck cargo to be 200, got %d", truck.Cargo)
 	}
 }
+
+func TestConcurrentUpdate(t *testing.T) {
+	manager := NewTruckManager()
+	manager.AddTruck("1", 100)
+
+	const numGoroutines = 100
+	const iterations = 100
+	done := make(chan bool)
+
+	for i := 0; i < numGoroutines; i++ {
+		go func() {
+			for j := 0; j < iterations; j++ {
+				truck, _ := manager.GetTruck("1")
+				manager.UpdateTruckCargo("1", truck.Cargo+1)
+			}
+			done <- true
+		}()
+	}
+
+	for i := 0; i < numGoroutines; i++ {
+		<-done
+	}
+}
